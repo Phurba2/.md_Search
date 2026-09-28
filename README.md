@@ -1,6 +1,6 @@
 # PDF Semantic Search with PostgreSQL and pgvector
 
-A local PDF semantic-search pipeline. Put PDF files in `pdf/`, register them in PostgreSQL, extract and chunk their text, generate embeddings with `all-MiniLM-L6-v2`, and search using vector, keyword, or hybrid ranking.
+A minimal local PDF semantic-search system. Place PDFs in `pdf/`, register them in PostgreSQL, extract and chunk their text, generate embeddings with `all-MiniLM-L6-v2`, and search using vector, keyword, or hybrid ranking.
 
 ## Stack
 
@@ -12,7 +12,7 @@ A local PDF semantic-search pipeline. Put PDF files in `pdf/`, register them in 
 
 ## Setup
 
-Create the database and enable pgvector as a PostgreSQL administrator:
+Enable pgvector as a PostgreSQL administrator:
 
 ```bash
 sudo -u postgres psql -d pdf_vector -c "CREATE EXTENSION IF NOT EXISTS vector;"
@@ -24,38 +24,42 @@ Initialize the schema from the project directory:
 PGPASSWORD='your-password' psql -h localhost -U furba -d pdf_vector -f schema.sql
 ```
 
-The application defaults are configured in `config/settings.py` and can be overridden with environment variables.
+The database defaults are configured in `config/settings.py` and can be overridden with environment variables.
 
-## Index and search a PDF
+## Index PDFs
 
-Place a PDF in `pdf/`, then register it:
+Place one or more PDFs in `pdf/`. From Python, run:
 
-```bash
-PGPASSWORD='your-password' ./env/bin/python scripts/cli.py ingest
+```python
+from index import ingest_and_embed
+
+print(ingest_and_embed())
 ```
 
-Create chunks and embeddings:
+This registers valid PDFs, extracts their text, creates chunks, and stores 384-dimensional embeddings in PostgreSQL.
 
-```bash
-PGPASSWORD='your-password' ./env/bin/python - <<'PY'
-from src.embedding_pipeline import create_default_pipeline
-print(create_default_pipeline().process_pending_papers())
-PY
+## Search PDFs
+
+```python
+from index import search
+
+results = search("What does the document say about avoiding financial ruin?")
+
+for result in results:
+    print(result.filename, result.score)
+    for chunk in result.matched_chunks:
+        print(chunk["text"])
 ```
 
-Ask a question with hybrid semantic and keyword search:
+Use a specific search mode when needed:
 
-```bash
-PGPASSWORD='your-password' ./env/bin/python scripts/ask_pdf.py \
-  "What does the document say about avoiding financial ruin?"
-```
+```python
+from index import search
+from src.search import SearchMode
 
-Search modes are available through the CLI:
-
-```bash
-./env/bin/python scripts/cli.py search --query "your question" --mode vector
-./env/bin/python scripts/cli.py search --query "your terms" --mode keyword
-./env/bin/python scripts/cli.py search --query "your question" --mode hybrid
+vector_results = search("your question", mode=SearchMode.VECTOR)
+keyword_results = search("your terms", mode=SearchMode.KEYWORD)
+hybrid_results = search("your question", mode=SearchMode.HYBRID)
 ```
 
 ## Database tables
@@ -63,4 +67,4 @@ Search modes are available through the CLI:
 - `papers`: registered PDF filenames, paths, titles, and processing status
 - `paper_chunks`: extracted chunks, metadata, and 384-dimensional embeddings
 
-The project intentionally does not fetch papers from ArXiv or any other external paper repository.
+The project does not fetch papers from ArXiv or any external paper repository.
