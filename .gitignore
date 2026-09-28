@@ -1,0 +1,8 @@
+env/
+__pycache__/
+*.py[cod]
+.env
+cache/
+logs/
+pdf/*.pdf
+*.log
