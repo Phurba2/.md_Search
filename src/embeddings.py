@@ -4,8 +4,6 @@ from typing import List
 import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
-
 from config.settings import (
     EMBEDDING_BATCH_SIZE,
     EMBEDDING_DEVICE,
