@@ -66,5 +66,3 @@ hybrid_results = search("your question", mode=SearchMode.HYBRID)
 
 - `papers`: registered PDF filenames, paths, titles, and processing status
 - `paper_chunks`: extracted chunks, metadata, and 384-dimensional embeddings
-
-The project does not fetch papers from ArXiv or any external paper repository.
