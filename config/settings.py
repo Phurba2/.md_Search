@@ -16,6 +16,4 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 EMBEDDING_BATCH_SIZE = int(os.getenv("EMBEDDING_BATCH_SIZE", "32"))
 EMBEDDING_DEVICE = os.getenv("EMBEDDING_DEVICE", "cpu")
 
-PDF_STORAGE_PATH = BASE_DIR / os.getenv("PDF_STORAGE_PATH", "pdf")
-CACHE_PATH = BASE_DIR / os.getenv("CACHE_PATH", "cache")
-LOG_PATH = BASE_DIR / os.getenv("LOG_PATH", "logs")
+MARKDOWN_STORAGE_PATH = BASE_DIR / os.getenv("MARKDOWN_STORAGE_PATH", "markdown")

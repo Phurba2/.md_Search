@@ -1,7 +1,6 @@
 psycopg2-binary
 pgvector
 python-dotenv
-PyMuPDF
 nltk
 numpy
 sentence-transformers

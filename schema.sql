@@ -1,4 +1,4 @@
--- Minimal schema for user-provided PDFs and semantic search.
+-- Minimal schema for user-provided Markdown files and semantic search.
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS papers (
     id SERIAL PRIMARY KEY,
     filename TEXT UNIQUE NOT NULL,
     title TEXT NOT NULL,
-    pdf_path TEXT NOT NULL,
-    pdf_processed BOOLEAN DEFAULT FALSE,
+    file_path TEXT NOT NULL,
+    processed BOOLEAN DEFAULT FALSE,
     embedding_generated BOOLEAN DEFAULT FALSE,
     processing_error TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -22,9 +22,6 @@ CREATE TABLE IF NOT EXISTS paper_chunks (
     chunk_tokens INTEGER,
     embedding vector(384),
     section_name VARCHAR(255),
-    page_number INTEGER,
-    char_start INTEGER,
-    char_end INTEGER,
     has_math BOOLEAN DEFAULT FALSE,
     has_code BOOLEAN DEFAULT FALSE,
     has_references BOOLEAN DEFAULT FALSE,

@@ -8,7 +8,7 @@ from psycopg2.extras import execute_batch
 
 from config.settings import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, EMBEDDING_BATCH_SIZE
 from src.embeddings import EmbeddingGenerator
-from src.pdf_extractor import PDFExtractor
+from src.markdown_extractor import MarkdownExtractor
 from src.text_chunker import TextChunker
 
 logger = logging.getLogger(__name__)
@@ -34,18 +34,14 @@ class EmbeddingPipeline:
                 rows = []
                 for index, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
                     text = chunk["text"]
-                    rows.append((paper_id, index, text, chunk.get("token_count"), embedding.tolist(),
-                                 chunk.get("section_name"), chunk.get("page_number"), chunk.get("char_start"),
-                                 chunk.get("char_end"), self._detect_math(text), self._detect_code(text),
-                                 self._detect_references(text)))
+                    rows.append((paper_id, index, text, chunk.get("token_count"), embedding.tolist(), chunk.get("section_name"), self._detect_math(text), self._detect_code(text), self._detect_references(text)))
                 execute_batch(cursor, """
                     INSERT INTO paper_chunks
-                    (paper_id, chunk_index, chunk_text, chunk_tokens, embedding,
-                     section_name, page_number, char_start, char_end, has_math, has_code, has_references)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    (paper_id, chunk_index, chunk_text, chunk_tokens, embedding, section_name, has_math, has_code, has_references)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, rows, page_size=self.batch_size)
                 cursor.execute("""
-                    UPDATE papers SET embedding_generated = TRUE, pdf_processed = TRUE,
+                    UPDATE papers SET embedding_generated = TRUE, processed = TRUE,
                     processing_error = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = %s
                 """, (paper_id,))
             conn.commit()
@@ -72,25 +68,21 @@ class EmbeddingPipeline:
         conn = self._get_connection()
         try:
             with conn.cursor() as cursor:
-                cursor.execute("""
-                    SELECT id, pdf_path FROM papers
-                    WHERE embedding_generated = FALSE
-                    ORDER BY id LIMIT %s
-                """, (limit,))
+                cursor.execute("SELECT id, file_path FROM papers WHERE embedding_generated = FALSE ORDER BY id LIMIT %s", (limit,))
                 papers = cursor.fetchall()
         finally:
             conn.close()
 
         processed = failed = 0
-        for paper_id, pdf_path in papers:
+        for paper_id, file_path in papers:
             try:
-                extracted = PDFExtractor().extract_paper_text(pdf_path)
+                extracted = MarkdownExtractor().extract(file_path)
                 chunks = TextChunker().chunk_paper(text=extracted["text"], sections=extracted["sections"])
                 self.process_paper(paper_id, chunks)
                 processed += 1
             except Exception as error:
                 failed += 1
-                logger.exception("Failed to process paper %d: %s", paper_id, error)
+                logger.exception("Failed to process document %d: %s", paper_id, error)
                 self._record_error(paper_id, str(error))
         return {"requested": limit, "found": len(papers), "processed": processed, "failed": failed}
 
