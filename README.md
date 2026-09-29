@@ -7,7 +7,7 @@ It reads Markdown files from `markdown/`, splits their text into overlapping chu
 ## 1. Install
 
 ```bash
-git clone https://github.com/Phurba2/Pdf_Search.git
+git clone https://github.com/Phurba2/.md_Search.git
 cd Pdf_Search
 python3 -m venv env
 source env/bin/activate
