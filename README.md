@@ -11,7 +11,14 @@ git clone https://github.com/Phurba2/Pdf_Search.git
 cd Pdf_Search
 python3 -m venv env
 source env/bin/activate
-pip install -r requirements.txt
+
+# Confirm Python and pip belong to this virtual environment
+which python
+which pip
+
+# Both paths should contain: /MarkDown_similarity_search_using_postgres/env/bin/
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
 ## 2. Configure PostgreSQL
@@ -86,13 +93,13 @@ The heading becomes metadata such as `section_name = 'Staying Wealthy'`. Text is
 
 ## 6. Search
 
-Create `ask.py`:
+Create `ask.py` in the project root (the repository includes the same example):
 
 ```python
 import sys
 from index import search
 
-question = " ".join(sys.argv[1:]) or "What is the main idea?"
+question = " ".join(sys.argv[1:]) or "What is EliteFreelancer?"
 
 for result in search(question):
     print(f"File: {result.filename}")
@@ -105,7 +112,7 @@ for result in search(question):
 Ask a question:
 
 ```bash
-python ask.py "What does the document say about avoiding financial ruin?"
+python ask.py "What services does EliteFreelancer provide?"
 ```
 
 The default is hybrid search. It combines vector similarity through `pgvector` with keyword similarity through PostgreSQL `pg_trgm`.
@@ -173,3 +180,25 @@ Make sure files end in `.md` and are inside `markdown/`, then run indexing again
 ### No text is extracted
 
 Save the file as UTF-8 Markdown. Markdown is plain text and does not require OCR or a PDF parser.
+
+### `externally-managed-environment`
+
+If `pip install` shows a PEP 668 or `externally-managed-environment` error, your `env` folder is not a working virtual environment. Recreate it:
+
+```bash
+deactivate 2>/dev/null || true
+rm -rf env
+python3 -m venv env
+source env/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Use `python -m pip`, not a system `pip`, and verify the paths:
+
+```bash
+which python
+which pip
+```
+
+Both should point to `.../MarkDown_similarity_search_using_postgres/env/bin/`.

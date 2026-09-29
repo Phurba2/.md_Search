@@ -50,7 +50,7 @@ class PaperSearchEngine:
             SELECT p.id AS paper_id, p.filename, p.title,
                    1 - (c.embedding <=> %s::vector) AS score,
                    c.id AS chunk_id, c.chunk_index, c.chunk_text,
-                   c.section_name, c.page_number
+                   c.section_name
             FROM paper_chunks c JOIN papers p ON p.id = c.paper_id
             WHERE c.embedding IS NOT NULL
             ORDER BY c.embedding <=> %s::vector LIMIT %s
@@ -64,7 +64,7 @@ class PaperSearchEngine:
             SELECT p.id AS paper_id, p.filename, p.title,
                    similarity(c.chunk_text, %s) AS score,
                    c.id AS chunk_id, c.chunk_index, c.chunk_text,
-                   c.section_name, c.page_number
+                   c.section_name
             FROM paper_chunks c JOIN papers p ON p.id = c.paper_id
             WHERE c.chunk_text %% %s
             ORDER BY similarity(c.chunk_text, %s) DESC LIMIT %s
@@ -84,7 +84,7 @@ class PaperSearchEngine:
             item["matched_chunks"].append({
                 "chunk_id": row["chunk_id"], "chunk_index": row["chunk_index"],
                 "text": row["chunk_text"], "section_name": row["section_name"],
-                "page_number": row["page_number"], "score": float(row["score"])
+                "score": float(row["score"])
             })
         results = sorted(grouped.values(), key=lambda x: x["score"], reverse=True)
         for result in results:
@@ -114,7 +114,7 @@ class PaperSearchEngine:
                 SELECT p.id AS paper_id, p.filename, p.title,
                        1 - (c.embedding <=> %s::vector) AS score,
                        c.id AS chunk_id, c.chunk_index, c.chunk_text,
-                       c.section_name, c.page_number
+                       c.section_name
                 FROM paper_chunks c JOIN papers p ON p.id = c.paper_id
                 WHERE c.embedding IS NOT NULL AND p.id != %s
                 ORDER BY c.embedding <=> %s::vector LIMIT %s
