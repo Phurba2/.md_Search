@@ -42,8 +42,8 @@ sudo -u postgres createdb md_vector
 Enable the required extensions:
 
 ```bash
-sudo -u postgres psql -d pdf_vector -c "CREATE EXTENSION IF NOT EXISTS vector;"
-sudo -u postgres psql -d pdf_vector -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+sudo -u postgres psql -d md_vector -c "CREATE EXTENSION IF NOT EXISTS vector;"
+sudo -u postgres psql -d md_vector -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
 ```
 
 Create the tables:
@@ -137,7 +137,7 @@ psql -h localhost -U furba -d md_vector -c "SELECT id, filename, processed, embe
 Check chunks and embeddings:
 
 ```bash
-psql -h localhost -U furba -d pdf_vector -c "
+psql -h localhost -U furba -d md_vector -c "
 SELECT p.filename, COUNT(c.id) AS chunks,
        COUNT(c.embedding) AS embeddings
 FROM papers p
@@ -170,7 +170,7 @@ GROUP BY p.filename;
 ### `type "vector" does not exist`
 
 ```bash
-sudo -u postgres psql -d pdf_vector -c "CREATE EXTENSION IF NOT EXISTS vector;"
+sudo -u postgres psql -d md_vector -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
 
 ### No documents are found
