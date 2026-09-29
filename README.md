@@ -8,7 +8,7 @@ It reads Markdown files from `markdown/`, splits their text into overlapping chu
 
 ```bash
 git clone https://github.com/Phurba2/.md_Search.git
-cd Pdf_Search
+cd .md_search
 python3 -m venv env
 source env/bin/activate
 
@@ -28,7 +28,7 @@ Create `.env` in the project root:
 ```env
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=pdf_vector
+DB_NAME=md_vector
 DB_USER=furba
 DB_PASSWORD=furba
 ```
@@ -36,7 +36,7 @@ DB_PASSWORD=furba
 Create the database if necessary:
 
 ```bash
-sudo -u postgres createdb pdf_vector
+sudo -u postgres createdb md_vector
 ```
 
 Enable the required extensions:
@@ -131,7 +131,7 @@ hybrid_results = search("your question", mode=SearchMode.HYBRID)
 ## 7. Check the database
 
 ```bash
-psql -h localhost -U furba -d pdf_vector -c "SELECT id, filename, processed, embedding_generated FROM papers;"
+psql -h localhost -U furba -d md_vector -c "SELECT id, filename, processed, embedding_generated FROM papers;"
 ```
 
 Check chunks and embeddings:
@@ -180,25 +180,3 @@ Make sure files end in `.md` and are inside `markdown/`, then run indexing again
 ### No text is extracted
 
 Save the file as UTF-8 Markdown. Markdown is plain text and does not require OCR or a PDF parser.
-
-### `externally-managed-environment`
-
-If `pip install` shows a PEP 668 or `externally-managed-environment` error, your `env` folder is not a working virtual environment. Recreate it:
-
-```bash
-deactivate 2>/dev/null || true
-rm -rf env
-python3 -m venv env
-source env/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-Use `python -m pip`, not a system `pip`, and verify the paths:
-
-```bash
-which python
-which pip
-```
-
-Both should point to `.../MarkDown_similarity_search_using_postgres/env/bin/`.
